@@ -4,6 +4,7 @@ import Dock from './components/Dock'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
+import Explore from './pages/Explore'
 
 function ProtectedLayout() {
   const { isLoggedIn } = useAuth()
@@ -29,9 +30,10 @@ function App() {
 
         <Route element={<ProtectedLayout />}>
           <Route path="/profile" element={<Profile />} />
+          <Route path="/explore" element={<Explore />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/profile" replace />} />
+        <Route path="*" element={<Navigate to="/explore" replace />} />
       </Routes>
     </AuthProvider>
   )
