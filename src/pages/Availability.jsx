@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { apiGet, apiPost, apiDelete } from '../api'
 
 const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+const MAX_RANGE_DAYS = 366
 
 function toDateString(date) {
   const year = date.getFullYear()
@@ -10,16 +11,25 @@ function toDateString(date) {
   return `${year}-${month}-${day}`
 }
 
+// Ignores incomplete or absurd values (e.g. the browser firing a change
+// while the year is still being typed).
+function isValidDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const year = Number(value.slice(0, 4))
+  return year >= 2000 && year <= 2100
+}
+
 function Availability() {
   const [artistId, setArtistId] = useState(null)
   const [markedDates, setMarkedDates] = useState(new Set())
-  const [selectedDates, setSelectedDates] = useState(new Set())
+  const [manualDates, setManualDates] = useState(new Set())
+  const [excludedDates, setExcludedDates] = useState(new Set())
+  const [rangeFrom, setRangeFrom] = useState('')
+  const [rangeTo, setRangeTo] = useState('')
   const [visibleMonth, setVisibleMonth] = useState(() => {
     const today = new Date()
     return new Date(today.getFullYear(), today.getMonth(), 1)
   })
-  const [rangeFrom, setRangeFrom] = useState('')
-  const [rangeTo, setRangeTo] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -42,51 +52,73 @@ function Availability() {
     loadAvailability()
   }, [])
 
+  // The range is always derived from the two inputs, so changing it
+  // replaces the previous range instead of piling up on top of it.
+  const rangeDates = useMemo(() => {
+    if (!isValidDate(rangeFrom) || !isValidDate(rangeTo)) return []
+
+    const start = new Date(`${rangeFrom}T00:00:00`)
+    const end = new Date(`${rangeTo}T00:00:00`)
+    if (start > end) return []
+
+    const totalDays = Math.round((end - start) / 86400000) + 1
+    if (totalDays > MAX_RANGE_DAYS) return []
+
+    const dates = []
+    const cursor = new Date(start)
+    while (cursor <= end) {
+      dates.push(toDateString(cursor))
+      cursor.setDate(cursor.getDate() + 1)
+    }
+    return dates
+  }, [rangeFrom, rangeTo])
+
+  const selectedDates = useMemo(() => {
+    const selected = new Set([...manualDates, ...rangeDates])
+    excludedDates.forEach((date) => selected.delete(date))
+    return selected
+  }, [manualDates, rangeDates, excludedDates])
+
+  function jumpToMonthOf(dateString) {
+    if (!isValidDate(dateString)) return
+    const [year, month] = dateString.split('-').map(Number)
+    setVisibleMonth(new Date(year, month - 1, 1))
+  }
+
+  function handleFromChange(event) {
+    setRangeFrom(event.target.value)
+    jumpToMonthOf(event.target.value)
+  }
+
+  function handleToChange(event) {
+    setRangeTo(event.target.value)
+  }
+
   function changeMonth(delta) {
     setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + delta, 1))
   }
 
   function toggleDate(dateString) {
-    const next = new Set(selectedDates)
-    if (next.has(dateString)) {
-      next.delete(dateString)
+    if (selectedDates.has(dateString)) {
+      if (manualDates.has(dateString)) {
+        const nextManual = new Set(manualDates)
+        nextManual.delete(dateString)
+        setManualDates(nextManual)
+      }
+      if (rangeDates.includes(dateString)) {
+        setExcludedDates(new Set([...excludedDates, dateString]))
+      }
     } else {
-      next.add(dateString)
+      setManualDates(new Set([...manualDates, dateString]))
+      const nextExcluded = new Set(excludedDates)
+      nextExcluded.delete(dateString)
+      setExcludedDates(nextExcluded)
     }
-    setSelectedDates(next)
-  }
-
-  function applyRange(from, to) {
-    if (!from || !to) return
-
-    const start = new Date(`${from}T00:00:00`)
-    const end = new Date(`${to}T00:00:00`)
-    if (start > end) return
-
-    const next = new Set(selectedDates)
-    const cursor = new Date(start)
-    while (cursor <= end) {
-      next.add(toDateString(cursor))
-      cursor.setDate(cursor.getDate() + 1)
-    }
-    setSelectedDates(next)
-
-    // Jump the calendar to the month where the range starts.
-    setVisibleMonth(new Date(start.getFullYear(), start.getMonth(), 1))
-  }
-
-  function handleFromChange(event) {
-    setRangeFrom(event.target.value)
-    applyRange(event.target.value, rangeTo)
-  }
-
-  function handleToChange(event) {
-    setRangeTo(event.target.value)
-    applyRange(rangeFrom, event.target.value)
   }
 
   function clearSelection() {
-    setSelectedDates(new Set())
+    setManualDates(new Set())
+    setExcludedDates(new Set())
     setRangeFrom('')
     setRangeTo('')
   }
