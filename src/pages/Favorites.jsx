@@ -1,21 +1,37 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { apiGet, apiPost } from '../api'
 
 const STORAGE_URL = 'http://127.0.0.1:8000/storage'
 
 function Favorites() {
   const [favorites, setFavorites] = useState([])
-  const [startedSwaps, setStartedSwaps] = useState([])
+  const [activeSwaps, setActiveSwaps] = useState({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
   const [startingId, setStartingId] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
-    async function loadFavorites() {
+    async function loadData() {
       try {
-        const data = await apiGet('/favorites')
-        setFavorites(data.favorites)
+        const me = await apiGet('/me')
+        const myArtistId = me.artist.id
+
+        const favoritesData = await apiGet('/favorites')
+        setFavorites(favoritesData.favorites)
+
+        // Map of "other artist id" -> status, only for swaps still in play.
+        const swapsData = await apiGet('/swaps')
+        const active = {}
+        swapsData.swaps.forEach((swap) => {
+          if (swap.status === 'pending' || swap.status === 'confirmed') {
+            const otherId = swap.artist_a_id === myArtistId ? swap.artist_b_id : swap.artist_a_id
+            active[otherId] = swap.status
+          }
+        })
+        setActiveSwaps(active)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -23,8 +39,8 @@ function Favorites() {
       }
     }
 
-    loadFavorites()
-  }, [])
+    loadData()
+  }, [refreshKey])
 
   async function handleStartSwap(artistId) {
     setError('')
@@ -33,8 +49,8 @@ function Favorites() {
 
     try {
       await apiPost('/swaps', { artist_id: artistId })
-      setStartedSwaps([...startedSwaps, artistId])
       setSuccess('Swap created! You can follow it in the Swaps section.')
+      setRefreshKey((key) => key + 1)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -68,7 +84,7 @@ function Favorites() {
           {favorites.map((favorite) => {
             const artist = favorite.artist
             const name = artist.user?.name || 'Unknown'
-            const swapStarted = startedSwaps.includes(artist.id)
+            const swapStatus = activeSwaps[artist.id]
 
             return (
               <div className="card" key={favorite.id}>
@@ -110,18 +126,40 @@ function Favorites() {
                     {artist.city || 'No city set'}
                   </p>
 
-                  {favorite.is_match ? (
-                    <button
-                      className="btn btn-lime btn-block"
-                      onClick={() => handleStartSwap(artist.id)}
-                      disabled={swapStarted || startingId === artist.id}
-                    >
-                      {swapStarted ? 'Swap started ✓' : startingId === artist.id ? 'Starting...' : 'Start a swap'}
-                    </button>
-                  ) : (
+                  {!favorite.is_match && (
                     <p style={{ color: 'var(--gray-400)', fontSize: '0.85rem', margin: 0 }}>
                       Waiting for them to like you back.
                     </p>
+                  )}
+
+                  {favorite.is_match && !swapStatus && (
+                    <button
+                      className="btn btn-lime btn-block"
+                      onClick={() => handleStartSwap(artist.id)}
+                      disabled={startingId === artist.id}
+                    >
+                      {startingId === artist.id ? 'Starting...' : 'Start a swap'}
+                    </button>
+                  )}
+
+                  {favorite.is_match && swapStatus === 'pending' && (
+                    <Link
+                      to="/swaps"
+                      className="btn btn-lavender btn-block"
+                      style={{ textAlign: 'center', textDecoration: 'none' }}
+                    >
+                      🤝 Swap in progress →
+                    </Link>
+                  )}
+
+                  {favorite.is_match && swapStatus === 'confirmed' && (
+                    <Link
+                      to="/swaps"
+                      className="btn btn-lavender btn-block"
+                      style={{ textAlign: 'center', textDecoration: 'none' }}
+                    >
+                      ✓ Swap confirmed →
+                    </Link>
                   )}
                 </div>
               </div>
