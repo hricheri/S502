@@ -7,6 +7,7 @@ import Profile from './pages/Profile'
 import Explore from './pages/Explore'
 import Favorites from './pages/Favorites'
 import Swaps from './pages/Swaps'
+import Availability from './pages/Availability'
 
 function ProtectedLayout() {
   const { isLoggedIn } = useAuth()
@@ -35,6 +36,7 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/swaps" element={<Swaps />} />
+          <Route path="/availability" element={<Availability />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/explore" replace />} />
