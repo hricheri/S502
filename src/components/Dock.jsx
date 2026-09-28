@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../useAuth'
 
 const icons = {
   explore: (

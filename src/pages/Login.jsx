@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { apiPost } from '../api'
-import { useAuth } from '../AuthContext'
+import { useAuth } from '../useAuth'
 
 function Login() {
   const [email, setEmail] = useState('')

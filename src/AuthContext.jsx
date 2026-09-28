@@ -1,7 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { useState } from 'react'
 import { getToken, setToken, clearToken, apiPost } from './api'
-
-const AuthContext = createContext(null)
+import { AuthContext } from './authState'
 
 export function AuthProvider({ children }) {
   const [token, setTokenState] = useState(getToken())
@@ -26,8 +25,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  return useContext(AuthContext)
 }
