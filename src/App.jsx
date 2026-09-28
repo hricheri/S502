@@ -1,25 +1,23 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
+import Dock from './components/Dock'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Profile from './pages/Profile'
 
-function ProfilePlaceholder() {
-  const { logout } = useAuth()
+function ProtectedLayout() {
+  const { isLoggedIn } = useAuth()
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />
+  }
 
   return (
-    <div className="page-content">
-      <h1>Sesión iniciada ✅</h1>
-      <p>Pantalla temporal: el perfil real viene después.</p>
-      <button className="btn btn-lime" onClick={logout}>
-        Log out
-      </button>
-    </div>
+    <>
+      <Dock />
+      <Outlet />
+    </>
   )
-}
-
-function ProtectedRoute({ children }) {
-  const { isLoggedIn } = useAuth()
-  return isLoggedIn ? children : <Navigate to="/login" replace />
 }
 
 function App() {
@@ -28,15 +26,12 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePlaceholder />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+
+        <Route element={<ProtectedLayout />}>
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/profile" replace />} />
       </Routes>
     </AuthProvider>
   )
