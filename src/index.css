@@ -1,111 +1,235 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --lima-100: #f1fbd0;
+  --lima-300: #d2f05f;
+  --lima-400: #c2e444;
+  --lima-700: #5f7a0a;
+  --lavender-50: #f5f3f8;
+  --lavender-100: #ebe6f0;
+  --lavender-300: #c9bcda;
+  --lavender-500: #a99bc4;
+  --lavender-600: #8f7fae;
+  --lavender-700: #6f5c96;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --danger-50: #fef2f2;
+  --danger-600: #dc2626;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --radius-card: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  font-family: 'Nunito', sans-serif;
+  background: var(--gray-100);
+  color: var(--gray-900);
+  min-height: 100vh;
 }
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+h2,
+h3 {
   margin: 0;
+  font-weight: 900;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* ---------- Layout ---------- */
+.page-header {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1.5rem 2rem;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.page-header h1 {
+  font-size: 2rem;
+}
+
+.page-header p {
+  margin: 0.25rem 0 0;
+  color: var(--gray-500);
+}
+
+.page-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 5rem;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: white;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 1.1rem;
+  padding: 0.85rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.btn-lime {
+  background: var(--lima-300);
+  color: var(--gray-900);
+}
+
+.btn-lime:hover:not(:disabled) {
+  background: var(--lima-400);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--gray-700);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--gray-200);
+}
+
+.btn-lavender {
+  background: var(--lavender-100);
+  color: var(--lavender-700);
+}
+
+.btn-dark {
+  background: var(--gray-900);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger-50);
+  color: var(--danger-600);
+}
+
+/* ---------- Badges y píldoras ---------- */
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.badge-lima {
+  background: var(--lima-300);
+  color: var(--gray-900);
+}
+
+.badge-lavender {
+  background: var(--lavender-300);
+  color: var(--gray-900);
+}
+
+.badge-gray {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--lima-100);
+  color: var(--lima-700);
+}
+
+/* ---------- Formularios ---------- */
+.field {
+  margin-bottom: 1.1rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  margin-bottom: 0.35rem;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 1rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--lavender-500);
+}
+
+/* ---------- Avisos ---------- */
+.alert {
+  padding: 0.85rem 1.1rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.alert-error {
+  background: var(--danger-50);
+  color: var(--danger-600);
+}
+
+.alert-success {
+  background: var(--lima-100);
+  color: var(--lima-700);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--gray-500);
 }
