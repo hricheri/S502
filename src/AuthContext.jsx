@@ -1,0 +1,33 @@
+import { createContext, useContext, useState } from 'react'
+import { getToken, setToken, clearToken, apiPost } from './api'
+
+const AuthContext = createContext(null)
+
+export function AuthProvider({ children }) {
+  const [token, setTokenState] = useState(getToken())
+
+  function saveSession(newToken) {
+    setToken(newToken)
+    setTokenState(newToken)
+  }
+
+  async function logout() {
+    try {
+      await apiPost('/logout')
+    } catch {
+      // Even if the request fails, we still clear the local session.
+    }
+    clearToken()
+    setTokenState(null)
+  }
+
+  return (
+    <AuthContext.Provider value={{ token, isLoggedIn: !!token, saveSession, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  return useContext(AuthContext)
+}
