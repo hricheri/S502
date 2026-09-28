@@ -14,24 +14,25 @@ function Swaps() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState(null)
-
-  async function loadSwaps() {
-    try {
-      const me = await apiGet('/me')
-      setMyArtistId(me.artist.id)
-
-      const data = await apiGet('/swaps')
-      setSwaps(data.swaps)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
+    async function loadSwaps() {
+      try {
+        const me = await apiGet('/me')
+        setMyArtistId(me.artist.id)
+
+        const data = await apiGet('/swaps')
+        setSwaps(data.swaps)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     loadSwaps()
-  }, [])
+  }, [refreshKey])
 
   async function handleConfirm(swapId) {
     setError('')
@@ -39,7 +40,7 @@ function Swaps() {
 
     try {
       await apiPut(`/swaps/${swapId}`)
-      await loadSwaps()
+      setRefreshKey((key) => key + 1)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -53,7 +54,7 @@ function Swaps() {
 
     try {
       await apiDelete(`/swaps/${swapId}/reject`)
-      await loadSwaps()
+      setRefreshKey((key) => key + 1)
     } catch (err) {
       setError(err.message)
     } finally {
